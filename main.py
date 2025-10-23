@@ -1,7 +1,7 @@
 import uvicorn
 from fastapi import FastAPI, HTTPException
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig, MessageType
-from pydantic import BaseModel, EmailStr, ConfigDict  # <-- Import ConfigDict
+from pantic import BaseModel, EmailStr, ConfigDict  # <-- Import ConfigDict
 from pydantic_settings import BaseSettings
 from starlette.middleware.cors import CORSMiddleware
 import os  # <-- Import os
@@ -13,7 +13,6 @@ class ContactForm(BaseModel):
     message: str
 
 # 2. Settings class to load credentials from .env
-# --- THIS SECTION IS UPDATED ---
 # Get the absolute path to the directory where this script is located
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 # Build the full path to the .env file
@@ -31,30 +30,31 @@ class Settings(BaseSettings):
     MAIL_FROM: EmailStr
     MAIL_PORT: int
     MAIL_SERVER: str
-# --- END OF UPDATE ---
 
 # Load settings
 settings = Settings()
 
 # 3. FastAPI-Mail configuration
+# --- THIS IS THE UPDATED SECTION ---
 conf = ConnectionConfig(
     MAIL_USERNAME = settings.MAIL_USERNAME,
     MAIL_PASSWORD = settings.MAIL_PASSWORD,
     MAIL_FROM = settings.MAIL_FROM,
     MAIL_PORT = settings.MAIL_PORT,
     MAIL_SERVER = settings.MAIL_SERVER,
-    MAIL_STARTTLS = True,
-    MAIL_SSL_TLS = False,
+    MAIL_STARTTLS = False, # <-- Set to False for Port 465
+    MAIL_SSL_TLS = True,   # <-- Set to True for Port 465
     USE_CREDENTIALS = True,
     VALIDATE_CERTS = True
 )
+# --- END OF UPDATE ---
 
 app = FastAPI()
 
 # 4. Add CORS Middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allows all origins (e.g., file://, localhost)
+    allow_origins=["*"],  # For production, replace "*" with your frontend URL
     allow_credentials=True,
     allow_methods=["*"],  # Allows all methods (POST, GET, etc.)
     allow_headers=["*"],  # Allows all headers
@@ -67,8 +67,7 @@ async def send_email(form_data: ContactForm):
     # This is the email you want to send *to*
     admin_email = "teamsamayai01@gmail.com" 
 
-    # --- THIS SECTION IS UPDATED ---
-    # First, prepare the message with HTML line breaks.
+    # Prepare the message with HTML line breaks
     message_with_breaks = form_data.message.replace("\n", "<br>")
     
     # Now, use that new, clean variable inside the f-string.
@@ -84,7 +83,6 @@ async def send_email(form_data: ContactForm):
     </body>
     </html>
     """
-    # --- END OF UPDATE ---
 
     message = MessageSchema(
         subject=f"New Website Message from {form_data.name}",
@@ -98,7 +96,7 @@ async def send_email(form_data: ContactForm):
         await fm.send_message(message)
         return {"status": "success", "message": "Email sent successfully"}
     except Exception as e:
-        print(e) # Print error to server console for debugging
+        print(f"Error sending email: {e}") # Print error to server console
         raise HTTPException(status_code=500, detail="Failed to send email.")
 
 # 6. Run the app
