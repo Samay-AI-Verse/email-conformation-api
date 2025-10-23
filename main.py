@@ -1,10 +1,10 @@
 import uvicorn
 from fastapi import FastAPI, HTTPException
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig, MessageType
-from pantic import BaseModel, EmailStr, ConfigDict  # <-- Import ConfigDict
+from pydantic import BaseModel, EmailStr, ConfigDict  # <-- THE FIX IS HERE
 from pydantic_settings import BaseSettings
 from starlette.middleware.cors import CORSMiddleware
-import os  # <-- Import os
+import os
 
 # 1. Model to validate incoming form data
 class ContactForm(BaseModel):
@@ -35,19 +35,17 @@ class Settings(BaseSettings):
 settings = Settings()
 
 # 3. FastAPI-Mail configuration
-# --- THIS IS THE UPDATED SECTION ---
 conf = ConnectionConfig(
     MAIL_USERNAME = settings.MAIL_USERNAME,
     MAIL_PASSWORD = settings.MAIL_PASSWORD,
     MAIL_FROM = settings.MAIL_FROM,
     MAIL_PORT = settings.MAIL_PORT,
     MAIL_SERVER = settings.MAIL_SERVER,
-    MAIL_STARTTLS = False, # <-- Set to False for Port 465
-    MAIL_SSL_TLS = True,   # <-- Set to True for Port 465
+    MAIL_STARTTLS = False, # Set to False for Port 465
+    MAIL_SSL_TLS = True,   # Set to True for Port 465
     USE_CREDENTIALS = True,
     VALIDATE_CERTS = True
 )
-# --- END OF UPDATE ---
 
 app = FastAPI()
 
