@@ -1,4 +1,5 @@
-fastapi
-uvicorn[standard]
-fastapi-mail
-pydantic-settings
+fastapi==0.111.1
+uvicorn[standard]==0.30.1
+fastapi-mail==1.4.1
+pydantic==2.7.4
+pydantic-settings==2.3.0
