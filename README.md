@@ -1,5 +1,2 @@
 ﻿# email-conformation-api
 
-
-
-
