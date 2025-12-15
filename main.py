@@ -6,6 +6,9 @@ from pydantic_settings import BaseSettings
 from starlette.middleware.cors import CORSMiddleware
 import os
 
+
+
+
 # 1. Model to validate incoming form data
 class ContactForm(BaseModel):
     name: str
